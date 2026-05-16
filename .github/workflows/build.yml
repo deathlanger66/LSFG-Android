@@ -19,18 +19,12 @@ jobs:
 
       - name: Patch ABI
         run: |
-          sed -i 's/include("arm64-v8a", "x86_64")/include("armeabi-v7a")/' LSFG-Android-Application/app/build.gradle.kts
-          sed -i 's/include("arm64-v8a")/include("armeabi-v7a")/' LSFG-Android-Application/app/build.gradle.kts
+          sed -i 's/arm64-v8a/armeabi-v7a/g' LSFG-Android-Application/app/build.gradle.kts
 
-      - name: Patch C++
+      - name: Bruteforce Patch C++
         run: |
-          python3 - <<'PY'
-          path = "LSFG-Android-Application/app/src/main/cpp/lsfg_render_loop.cpp"
-          s = open(path).read()
-          s = s.replace('static_cast<void *>(&s.swap_surface)', 'reinterpret_cast<void*>((uintptr_t)s.swap_surface)')
-          s = s.replace('static_cast<void *>(&s.swap_swapchain)', 'reinterpret_cast<void*>((uintptr_t)s.swap_swapchain)')
-          open(path, "w").write(s)
-          PY
+          sed -i '651s/.*/        LOGI("createSwapchain: surface=%p", (void*)0);/' LSFG-Android-Application/app/src/main/cpp/lsfg_render_loop.cpp
+          sed -i '753s/.*/        LOGI("createSwapchain: swapchain=%p", (void*)0);/' LSFG-Android-Application/app/src/main/cpp/lsfg_render_loop.cpp
 
       - name: Build
         run: |
