@@ -24,8 +24,13 @@ jobs:
 
       - name: Patch C++
         run: |
-          sed -i 's/static_cast<void \*>(&(s.swap_surface))/reinterpret_cast<void*>((uintptr_t)(s.swap_surface))/' LSFG-Android-Application/app/src/main/cpp/lsfg_render_loop.cpp
-          sed -i 's/static_cast<void \*>(&(s.swap_swapchain))/reinterpret_cast<void*>((uintptr_t)(s.swap_swapchain))/' LSFG-Android-Application/app/src/main/cpp/lsfg_render_loop.cpp
+          python3 - <<'PY'
+          path = "LSFG-Android-Application/app/src/main/cpp/lsfg_render_loop.cpp"
+          s = open(path).read()
+          s = s.replace('static_cast<void *>(&s.swap_surface)', 'reinterpret_cast<void*>((uintptr_t)s.swap_surface)')
+          s = s.replace('static_cast<void *>(&s.swap_swapchain)', 'reinterpret_cast<void*>((uintptr_t)s.swap_swapchain)')
+          open(path, "w").write(s)
+          PY
 
       - name: Build
         run: |
